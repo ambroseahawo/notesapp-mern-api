@@ -39,10 +39,10 @@ const createNewUser = asyncHandler(async (req, res) => {
   // hash password
   const hashedPassword = await bcrypt.hash(password, 10) // salt rounds
 
-  const newUUserObj = { username, "password": hashedPassword, roles }
+  const newUserObj = { username, "password": hashedPassword, roles }
 
   // create and store new user
-  const user = await User.create(newUUserObj)
+  const user = await User.create(newUserObj)
 
   if (user) {
     res.status(201).json({ message: `New user ${username} created` })
@@ -102,8 +102,8 @@ const deleteUser = asyncHandler(async (req, res) => {
     return res.status(400).json({ message: "User ID Required" })
   }
 
-  const notes = await Note.findOne({ user: id }).lean().exec()
-  if (notes?.length) {
+  const note = await Note.findOne({ user: id }).lean().exec()
+  if (note) {
     return res.status(400).json({ message: "User has assigned notes" })
   }
 
