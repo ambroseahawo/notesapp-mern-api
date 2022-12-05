@@ -7,6 +7,15 @@ const asyncHandler = require("express-async-handler")
 // @access private
 const getAllNotes = asyncHandler(async (req, res) => {
   const { id } = req.body
+  if (!id) {
+    return res.status(400).json({ message: "All fields are required" })
+  }
+
+  const user = await User.findById(id).exec()
+  if (!user) {
+    return res.status(400).json({ message: "User not found" })
+  }
+
   const notes = await Note.find({
     user: { $in: [id] }
   }).lean()
@@ -43,28 +52,45 @@ const createNewNote = asyncHandler(async (req, res) => {
 })
 
 
-// // @desc create note
-// // @route POST /notes
-// // @access private
-// const createNewNote = asyncHandler(async (req, res) => {
-//   const { userId, noteId } = req.body
+// @desc update note
+// @route PATCH /notes
+// @access private
+const updateNote = asyncHandler(async (req, res) => {
+  const { userId, noteId, title, text } = req.body
 
-//   if (!userId || !noteId) {
-//     return res.status(400).json({ message: "All fields are required" })
-//   }
+  if (!userId || !noteId) {
+    return res.status(400).json({ message: "All fields are required" })
+  }
 
-//   const note = await Note.findById(noteId).exec()
-//   if (!note) {
-//     return res.status(400).json({ message: "Note not found" })
-//   }
+  const user = await User.findById(userId).exec()
+  if (!user) {
+    return res.status(400).json({ message: "User not found" })
+  }
 
-//   const user = await User.findById(userId).exec()
-//   if (!user) {
-//     return res.status(400).json({ message: "User not found" })
-//   }
-// })
+  const userNote = await Note.find({
+    user: { $in: [id] }
+  }).lean()
+  if (!userNote?.length) {
+    return res.status(400).json({ message: "A user can only edit own notes" })
+  }
+
+  const note = await Note.findById(noteId, {
+    user: { $in: [id] }
+  }).exec()
+  if (!note) {
+    return res.status(400).json({ message: "Note not found" })
+  }
+
+  note.title = title
+  note.text = text
+
+  await note.save()
+
+  res.status(200).json({message: "Note Updated",})
+})
 
 module.exports = {
   getAllNotes,
-  createNewNote
+  createNewNote,
+  updateNote
 }
