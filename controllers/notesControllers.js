@@ -58,7 +58,7 @@ const createNewNote = asyncHandler(async (req, res) => {
 const updateNote = asyncHandler(async (req, res) => {
   const { userId, noteId, title, text } = req.body
 
-  if (!userId || !noteId) {
+  if (!userId || !noteId || !title || !text) {
     return res.status(400).json({ message: "All fields are required" })
   }
 
@@ -67,18 +67,13 @@ const updateNote = asyncHandler(async (req, res) => {
     return res.status(400).json({ message: "User not found" })
   }
 
-  const userNote = await Note.find({
-    user: { $in: [id] }
-  }).lean()
-  if (!userNote?.length) {
-    return res.status(400).json({ message: "A user can only edit own notes" })
-  }
-
-  const note = await Note.findById(noteId, {
-    user: { $in: [id] }
-  }).exec()
+  const note = await Note.findById(noteId).exec()
   if (!note) {
     return res.status(400).json({ message: "Note not found" })
+  }
+
+  if (note.user.toString() !== userId) {
+    return res.status(400).json({ message: "User can only edit own notes" })
   }
 
   note.title = title
@@ -86,7 +81,7 @@ const updateNote = asyncHandler(async (req, res) => {
 
   await note.save()
 
-  res.status(200).json({message: "Note Updated",})
+  res.status(200).json({ message: "Note Updated", })
 })
 
 module.exports = {
