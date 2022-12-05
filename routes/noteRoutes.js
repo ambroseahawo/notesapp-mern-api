@@ -5,5 +5,6 @@ const notesControllers = require("../controllers/notesControllers")
 router.route("/")
   .get(notesControllers.getAllNotes)
   .post(notesControllers.createNewNote)
+  .path(notesControllers.updateNote)
 
 module.exports = router
