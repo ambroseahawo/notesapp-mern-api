@@ -2,10 +2,10 @@ const User = require("../models/User")
 const Note = require("../models/Note")
 const asyncHandler = require("express-async-handler")
 
-// @desc get all notes
+// @desc get all notes per user
 // @route GET /notes
 // @access private
-const getAllNotes = asyncHandler(async (req, res) => {
+const getAllNotes_ = asyncHandler(async (req, res) => {
   const { id } = req.body
   if (!id) {
     return res.status(400).json({ message: "All fields are required" })
@@ -24,6 +24,28 @@ const getAllNotes = asyncHandler(async (req, res) => {
   }
   res.json(notes)
 })
+
+// @desc Get all notes
+// @route GET /notes
+// @access Private
+const getAllNotes = asyncHandler(async (req, res) => {
+  // Get all notes from MongoDB
+  const notes = await Note.find().lean()
+
+  // if no notes
+  if (!notes?.length) {
+    return res.status(400).json({ message: "No notes found" })
+  }
+
+  // Add username to each note before sending response
+  const notesWithUser = await Promise.all(notes.map(async (note) => {
+    const user = await User.findById(note.user).lean().exec()
+    return { ...note, username: user.username }
+  }))
+
+  res.json(notesWithUser)
+})
+
 
 // @desc create note
 // @route POST /notes
