@@ -85,9 +85,9 @@ const createNewNote = asyncHandler(async (req, res) => {
 // @route PATCH /notes
 // @access private
 const updateNote = asyncHandler(async (req, res) => {
-  const { userId, noteId, title, text } = req.body
+  const { userId, noteId, title, text, completed } = req.body
 
-  if (!userId || !noteId || !title || !text) {
+  if (!userId || !noteId || !title || !text || !completed) {
     return res.status(400).json({ message: "All fields are required" })
   }
 
@@ -105,12 +105,21 @@ const updateNote = asyncHandler(async (req, res) => {
     return res.status(400).json({ message: "User can only edit own notes" })
   }
 
+  // check for duplicate title
+  const duplicate = await Note.findOne({ title }).lean().exec()
+
+  // Allow renaming of the original note
+  if (duplicate && duplicate?._id.toString() !== id) {
+    return res.status(409).json({ message: "Duplicate note title" })
+  }
+
   note.title = title
   note.text = text
+  note.completed = completed
 
   await note.save()
 
-  res.status(200).json({ message: "Note Updated", })
+  res.status(200).json({ message: "Note Updated" })
 })
 
 module.exports = {
