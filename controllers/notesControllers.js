@@ -87,7 +87,7 @@ const createNewNote = asyncHandler(async (req, res) => {
 const updateNote = asyncHandler(async (req, res) => {
   const { userId, noteId, title, text, completed } = req.body
 
-  if (!userId || !noteId || !title || !text || !completed) {
+  if (!userId || !noteId || !title || !text) {
     return res.status(400).json({ message: "All fields are required" })
   }
 
