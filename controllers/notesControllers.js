@@ -144,7 +144,7 @@ const deleteNote = asyncHandler(async (req, res) => {
   const result = await note.deleteOne()
   const reply = `Note '${result.title}' with ID ${result._id} deleted`
 
-  res.json(reply)
+  res.status(200).json(reply)
 })
 
 module.exports = {
