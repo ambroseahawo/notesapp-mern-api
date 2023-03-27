@@ -96,7 +96,7 @@ const logout = (req, res) => {
 
   if (!cookies?.jwt) return res.sendStatus(204) // no content
 
-  res.cleanCookie("jwt", {
+  res.clearCookie("jwt", {
     httpOnly: true, sameSite: "None", secure: true
   })
 
